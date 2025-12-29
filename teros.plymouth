@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Teros
+Description=My Custom Attack on Titan Theme
+ModuleName=script
+
+[script]
+ImageDir=.
+ScriptFile=./teros.script
