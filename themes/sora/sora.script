@@ -1,5 +1,5 @@
 // --- SORA CONFIGURATION ---
-NUM = 52;           // 52 Frames
+NUM = 53;           // 52 Frames
 SPEED = 2;          // 1 = Fast, 3 = Slow
 
 screen.w = Window.GetWidth(0);

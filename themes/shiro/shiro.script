@@ -1,5 +1,5 @@
 // --- SHIRO CONFIGURATION ---
-NUM = 21;           // 21 Frames (0 to 20)
+NUM = 22;           // 21 Frames (0 to 20)
 SPEED = 2;          
 
 screen.w = Window.GetWidth(0);
