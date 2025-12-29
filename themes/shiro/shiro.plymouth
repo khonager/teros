@@ -1,9 +1,8 @@
 [Plymouth Theme]
-Name=shiro
-Description=template
-Comment=created By Aditya Shakya (@adi1090x)
+Name=Shiro
+Description=Shiro Theme (21 Frames)
 ModuleName=script
 
 [script]
-ImageDir=/usr/share/plymouth/themes/template
-ScriptFile=/usr/share/plymouth/themes/template/template.script
+ImageDir=.
+ScriptFile=./shiro.script

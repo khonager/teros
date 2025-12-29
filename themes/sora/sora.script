@@ -1,0 +1,38 @@
+// --- SORA CONFIGURATION ---
+NUM = 52;           // 52 Frames
+SPEED = 2;          // 1 = Fast, 3 = Slow
+
+screen.w = Window.GetWidth(0);
+screen.h = Window.GetHeight(0);
+screen.half.w = screen.w / 2;
+screen.half.h = screen.h / 2;
+
+// Load images: progress-0.png ... progress-51.png
+for (i = 0; i < NUM; i++)
+  flyingman_image[i] = Image("progress-" + i + ".png");
+
+flyingman_sprite = Sprite();
+
+// Center the sprite
+// We check if the image loaded successfully to avoid crash on missing frames
+if (flyingman_image[0]) {
+    flyingman_sprite.SetX(screen.half.w - flyingman_image[0].GetWidth() / 2);
+    flyingman_sprite.SetY(screen.half.h - flyingman_image[0].GetHeight() / 2);
+}
+
+progress = 0;
+
+fun refresh_callback ()
+  {
+    frame_index = Math.Int(progress / SPEED) % NUM;
+    flyingman_sprite.SetImage(flyingman_image[frame_index]);
+    progress++;
+  }
+
+Plymouth.SetRefreshFunction (refresh_callback);
+
+// Standard Plymouth modes
+fun DisplayNormalCallback() { state.status = "play"; }
+fun QuitCallback() { state.status = "quit"; }
+Plymouth.SetDisplayNormalFunction(DisplayNormalCallback);
+Plymouth.SetQuitFunction(QuitCallback);

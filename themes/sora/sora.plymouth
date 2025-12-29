@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Sora
+Description=Sora Theme (52 Frames)
+ModuleName=script
+
+[script]
+ImageDir=.
+ScriptFile=./sora.script
