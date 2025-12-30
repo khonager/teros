@@ -12,39 +12,44 @@
         pkgs = nixpkgs.legacyPackages.${system};
 
         install-themes = pkgs.writeShellScriptBin "install-themes" ''
+          if [ "$EUID" -ne 0 ]; then echo "Error: Must run as root"; exit 1; fi
           echo "Installing themes to /usr/share/plymouth/themes/..."
           if [ ! -d "themes/sora" ]; then echo "Error: Run from repo root"; exit 1; fi
-          sudo cp -rf themes/sora /usr/share/plymouth/themes/
-          sudo cp -rf themes/shiro /usr/share/plymouth/themes/
+          cp -rf themes/sora /usr/share/plymouth/themes/
+          cp -rf themes/shiro /usr/share/plymouth/themes/
           echo "Themes installed."
         '';
 
         run-sora = pkgs.writeShellScriptBin "run-sora" ''
+          if [ "$EUID" -ne 0 ]; then echo "Error: Must run as root"; exit 1; fi
           echo "Starting Sora Plymouth Daemon (Ctrl+C to stop)..."
-          # Quit any existing instance first
-          sudo ${pkgs.plymouth}/bin/plymouth quit 2>/dev/null || true
-          sudo ${pkgs.plymouth}/bin/plymouthd --debug --tty=`tty` --no-daemon --theme=sora
+          ${pkgs.plymouth}/bin/plymouth quit 2>/dev/null || true
+          ${pkgs.plymouth}/bin/plymouthd --debug --tty=`tty` --no-daemon --theme=sora
         '';
 
         run-shiro = pkgs.writeShellScriptBin "run-shiro" ''
+          if [ "$EUID" -ne 0 ]; then echo "Error: Must run as root"; exit 1; fi
           echo "Starting Shiro Plymouth Daemon (Ctrl+C to stop)..."
-          sudo ${pkgs.plymouth}/bin/plymouth quit 2>/dev/null || true
-          sudo ${pkgs.plymouth}/bin/plymouthd --debug --tty=`tty` --no-daemon --theme=shiro
+          ${pkgs.plymouth}/bin/plymouth quit 2>/dev/null || true
+          ${pkgs.plymouth}/bin/plymouthd --debug --tty=`tty` --no-daemon --theme=shiro
         '';
 
         show-ui = pkgs.writeShellScriptBin "show-ui" ''
+          if [ "$EUID" -ne 0 ]; then echo "Error: Must run as root"; exit 1; fi
           echo "Showing Splash Screen..."
-          sudo ${pkgs.plymouth}/bin/plymouth --show-splash
+          ${pkgs.plymouth}/bin/plymouth --show-splash
         '';
 
         test-password = pkgs.writeShellScriptBin "test-password" ''
+          if [ "$EUID" -ne 0 ]; then echo "Error: Must run as root"; exit 1; fi
           echo "Triggering Password Prompt..."
-          sudo ${pkgs.plymouth}/bin/plymouth ask-for-password --prompt=""
+          ${pkgs.plymouth}/bin/plymouth ask-for-password --prompt=""
         '';
 
         quit-plymouth = pkgs.writeShellScriptBin "quit-plymouth" ''
+          if [ "$EUID" -ne 0 ]; then echo "Error: Must run as root"; exit 1; fi
           echo "Stopping Plymouth..."
-          sudo ${pkgs.plymouth}/bin/plymouth quit
+          ${pkgs.plymouth}/bin/plymouth quit
         '';
 
       in
