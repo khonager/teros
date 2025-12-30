@@ -49,21 +49,63 @@
           ${pkgs.plymouth}/bin/plymouth ask-for-password --prompt=""
         '';
 
-        quit-plymouth = pkgs.writeShellScriptBin "quit-plymouth" ''
+        test-sora = pkgs.writeShellScriptBin "test-sora" ''
           if [ "$EUID" -ne 0 ]; then echo "Error: Must run as root"; exit 1; fi
-          echo "Stopping Plymouth..."
+          
+          # 1. Install (Local Runtime)
+          echo "Installing SORA to /run/plymouth/themes..."
+          mkdir -p /run/plymouth/themes
+          cp -rf themes/sora /run/plymouth/themes/
+          cp -rf themes/shiro /run/plymouth/themes/
+          
+          # 2. Run Test
+          echo "Starting Plymouth (Sora)..."
+          ${pkgs.plymouth}/bin/plymouthd --debug --tty=`tty` --no-daemon --theme=sora &
+          daemon_pid=$!
+          
+          # Wait for daemon to start
+          sleep 2
+          
+          echo "Showing Splash..."
+          ${pkgs.plymouth}/bin/plymouth --show-splash
+          
+          echo "Testing Password Prompt (simulated)..."
+          # Trigger a password prompt purely to see it
+          (${pkgs.plymouth}/bin/plymouth ask-for-password --prompt="Test" &)
+          
+          echo "Running for 10 seconds..."
+          sleep 10
+          
+          echo "Stopping..."
           ${pkgs.plymouth}/bin/plymouth quit
+          kill $daemon_pid 2>/dev/null || true
         '';
 
+        test-shiro = pkgs.writeShellScriptBin "test-shiro" ''
+          if [ "$EUID" -ne 0 ]; then echo "Error: Must run as root"; exit 1; fi
+          
+          echo "Installing SHIRO to /run/plymouth/themes..."
+          mkdir -p /run/plymouth/themes
+          cp -rf themes/sora /run/plymouth/themes/
+          cp -rf themes/shiro /run/plymouth/themes/
+          
+          echo "Starting Plymouth (Shiro)..."
+          ${pkgs.plymouth}/bin/plymouthd --debug --tty=`tty` --no-daemon --theme=shiro &
+          daemon_pid=$!
+          
+          sleep 2
+          ${pkgs.plymouth}/bin/plymouth --show-splash
+          (${pkgs.plymouth}/bin/plymouth ask-for-password --prompt="Test" &)
+          
+          sleep 10
+          ${pkgs.plymouth}/bin/plymouth quit
+          kill $daemon_pid 2>/dev/null || true
+        '';
       in
       {
         packages = {
-          install-themes = install-themes;
-          run-sora = run-sora;
-          run-shiro = run-shiro;
-          show-ui = show-ui;
-          test-password = test-password;
-          quit-plymouth = quit-plymouth;
+          test-sora = test-sora;
+          test-shiro = test-shiro;
         };
 
         devShells.default = pkgs.mkShell {
