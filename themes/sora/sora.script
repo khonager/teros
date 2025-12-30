@@ -31,8 +31,109 @@ fun refresh_callback ()
 
 Plymouth.SetRefreshFunction (refresh_callback);
 
+// --- PASSWORD & MESSAGE HANDLING ---
+
+// 0 = Chess, 1 = Binary
+bullet_mode = Math.Int(Math.Random() * 2);
+
+// Bullet Cache: Stores {image, sprite} for each active password character
+// We need this to keep colors/symbols consistent for existing characters while typing
+bullets_cache = [];
+
+fun GetRandomColor() {
+    // 0 = Gold, 1 = Red
+    if (Math.Int(Math.Random() * 2) == 0)
+        return {r: 0.8, g: 0.6, b: 0.0};
+    else
+        return {r: 0.8, g: 0.0, b: 0.0};
+}
+
+fun GetRandomSymbol() {
+    if (bullet_mode == 0) {
+        // Chess
+        rand = Math.Int(Math.Random() * 6);
+        if (rand == 0) return "♔";
+        if (rand == 1) return "♕";
+        if (rand == 2) return "♖";
+        if (rand == 3) return "♗";
+        if (rand == 4) return "♘";
+        return "♙";
+    } else {
+        // Binary
+        return Math.Int(Math.Random() * 2) + "";
+    }
+}
+
+// Password Container Sprite (Hidden, just used for positioning reference)
+password_area_y = screen.half.h + 100; // Position below the main animation
+
+fun DisplayPasswordCallback(prompt, bullets) {
+    total_bullets = bullets;
+    
+    // 1. Clean up excess bullets if backspacing
+    while (Math.Int(bullets_cache.length) > total_bullets) {
+        idx = bullets_cache.length - 1;
+        bullets_cache[idx].sprite.SetImage(NULL); // Remove from screen
+        bullets_cache[idx] = NULL;
+        bullets_cache.length--; // Shrink array (Plymouth arrays auto-shrink? manually managing length is safer)
+        // Actually Plymouth arrays are a bit weird, simplest is to just truncate logic or nullify
+    }
+    
+    // We recreate the array logic a bit simpler:
+    // Just loop up to total_bullets. If cache entry missing, create it.
+    
+    start_x = screen.half.w - (total_bullets * 15); // Simple centering (approx 30px width per char)
+
+    for (i = 0; i < total_bullets; i++) {
+        if (!bullets_cache[i]) {
+            // New bullet needed
+            symbol = GetRandomSymbol();
+            color = GetRandomColor();
+            
+            // Create Image
+            img = Image.Text(symbol, color.r, color.g, color.b);
+            spr = Sprite(img);
+            
+            bullets_cache[i] = {image: img, sprite: spr};
+        }
+        
+        // Update Position
+        bullets_cache[i].sprite.SetX(start_x + (i * 30));
+        bullets_cache[i].sprite.SetY(password_area_y);
+        bullets_cache[i].sprite.SetZ(100); // Top layer
+    }
+    
+    // Keep unused ones hidden (if any remain from a clear)
+    // In this logic, we cleared excess above, so we are good.
+    // Handling "clear" (bullets == 0)
+    if (total_bullets == 0) {
+       for (i = 0; bullets_cache[i]; i++) {
+           bullets_cache[i].sprite.SetImage(NULL);
+           bullets_cache[i] = NULL;
+       }
+    }
+}
+
+message_sprite = Sprite();
+message_sprite.SetPosition(screen.half.w, password_area_y + 50, 100);
+
+fun DisplayMessageCallback(text) {
+    // "Rule Violation. Try again."
+    my_image = Image.Text(text, 0.8, 0.0, 0.0); // Red error text
+    message_sprite.SetImage(my_image);
+    message_sprite.SetX(screen.half.w - my_image.GetWidth() / 2);
+    message_sprite.SetY(password_area_y + 50);
+}
+
+Plymouth.SetDisplayPasswordFunction(DisplayPasswordCallback);
+Plymouth.SetMessageFunction(DisplayMessageCallback);
+
 // Standard Plymouth modes
-fun DisplayNormalCallback() { state.status = "play"; }
+fun DisplayNormalCallback() { 
+    state.status = "play"; 
+    // Clear password UI or messages if needed when returning to normal?
+    // Usually password prompt blocks, so it's fine.
+}
 fun QuitCallback() { state.status = "quit"; }
 Plymouth.SetDisplayNormalFunction(DisplayNormalCallback);
 Plymouth.SetQuitFunction(QuitCallback);

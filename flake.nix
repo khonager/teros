@@ -13,11 +13,14 @@
 
         install-themes = pkgs.writeShellScriptBin "install-themes" ''
           if [ "$EUID" -ne 0 ]; then echo "Error: Must run as root"; exit 1; fi
-          echo "Installing themes to /usr/share/plymouth/themes/..."
+          echo "Installing themes to /run/plymouth/themes/ (Runtime location)..."
           if [ ! -d "themes/sora" ]; then echo "Error: Run from repo root"; exit 1; fi
-          cp -rf themes/sora /usr/share/plymouth/themes/
-          cp -rf themes/shiro /usr/share/plymouth/themes/
-          echo "Themes installed."
+          
+          ${pkgs.coreutils}/bin/mkdir -p /run/plymouth/themes
+          ${pkgs.coreutils}/bin/cp -rf themes/sora /run/plymouth/themes/
+          ${pkgs.coreutils}/bin/cp -rf themes/shiro /run/plymouth/themes/
+          
+          echo "Themes installed to /run/plymouth/themes/."
         '';
 
         run-sora = pkgs.writeShellScriptBin "run-sora" ''
