@@ -54,6 +54,15 @@
 
       in
       {
+        packages = {
+          install-themes = install-themes;
+          run-sora = run-sora;
+          run-shiro = run-shiro;
+          show-ui = show-ui;
+          test-password = test-password;
+          quit-plymouth = quit-plymouth;
+        };
+
         devShells.default = pkgs.mkShell {
           buildInputs = [
             pkgs.plymouth
@@ -67,13 +76,14 @@
 
           shellHook = ''
             echo "=== Teros Plymouth Dev Env ==="
-            echo "Available Scripts:"
-            echo "  install-themes : Copys local themes to /usr/share/plymouth/themes/"
-            echo "  run-sora       : Starts plymouthd with Sora theme (blocks terminal)"
-            echo "  run-shiro      : Starts plymouthd with Shiro theme (blocks terminal)"
-            echo "  show-ui        : Triggers --show-splash (run in separate terminal)"
-            echo "  test-password  : Triggers password prompt (run in separate terminal)"
-            echo "  quit-plymouth  : Kills the daemon"
+            echo "NOTE: If sudo fails with 'no new privileges', use 'nix build .#script' and run ./result/bin/script"
+            echo "Available Scripts (buildable via nix build .#<name>):"
+            echo "  install-themes"
+            echo "  run-sora"
+            echo "  run-shiro"
+            echo "  show-ui"
+            echo "  test-password"
+            echo "  quit-plymouth"
             echo "==============================="
           '';
         };
