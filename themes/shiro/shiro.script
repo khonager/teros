@@ -1,6 +1,6 @@
 // --- SHIRO CONFIGURATION ---
 NUM = 22;           // 21 Frames (0 to 20)
-SPEED = 2;          
+SPEED = 4;          // Doubled for half speed          
 
 screen.w = Window.GetWidth(0);
 screen.h = Window.GetHeight(0);
