@@ -116,7 +116,8 @@
             run-shiro
             show-ui
             test-password
-            quit-plymouth
+            test-sora
+            test-shiro
           ];
 
           shellHook = ''
@@ -124,11 +125,10 @@
             echo "NOTE: If sudo fails with 'no new privileges', use 'nix build .#script' and run ./result/bin/script"
             echo "Available Scripts (buildable via nix build .#<name>):"
             echo "  install-themes"
-            echo "  run-sora"
-            echo "  run-shiro"
-            echo "  show-ui"
-            echo "  test-password"
-            echo "  quit-plymouth"
+            echo "  run-sora / run-shiro"
+            echo "  show-ui / test-password"
+            echo "  test-sora (All-in-one Test)"
+            echo "  test-shiro (All-in-one Test)"
             echo "==============================="
           '';
         };
