@@ -150,8 +150,6 @@
           ls -R /run/plymouth/themes/shiro
           echo "Content of shiro.plymouth:"
           cat /run/plymouth/themes/shiro/shiro.plymouth
-          echo "Content of shiro.script:"
-          cat /run/plymouth/themes/shiro/shiro.script
           echo "-------------------"
 
           echo "Starting Plymouth (Shiro)..."
@@ -160,9 +158,19 @@
           
           sleep 2
           ${pkgs.plymouth}/bin/plymouth --show-splash
-          (${pkgs.plymouth}/bin/plymouth ask-for-password --prompt="Test" &)
           
-          sleep 7
+          echo ""
+          echo "=== SHIRO TEST ==="
+          echo "Animation should now be playing."
+          echo "Press Enter to trigger password prompt..."
+          read -r
+          
+          echo "Password prompt active. Type characters to see symbols, press Enter when done."
+          ${pkgs.plymouth}/bin/plymouth ask-for-password --prompt="Test Password"
+          
+          echo ""
+          echo "Press Enter to exit..."
+          read -r
           echo "Done."
         '';
       in
