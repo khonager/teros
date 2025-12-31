@@ -28,8 +28,6 @@ fun refresh_callback ()
 
 Plymouth.SetRefreshFunction (refresh_callback);
 
-Plymouth.SetRefreshFunction (refresh_callback);
-
 // --- PASSWORD HANDLING (SAFE PRODUCTION) ---
 bullets_sprites = [];
 bullets_images = [];
@@ -55,7 +53,6 @@ fun DisplayPasswordCallback(prompt, bullets) {
         // Create if missing
         if (!bullets_sprites[i]) {
             // Safe Mode: Always White "*"
-            // Avoids Unicode font crashes and complex logic
             img = Image.Text("*", 1.0, 1.0, 1.0); 
             spr = Sprite(img);
             
@@ -68,13 +65,6 @@ fun DisplayPasswordCallback(prompt, bullets) {
         bullets_sprites[i].SetZ(100);
     }
 }
-
-fun DisplayMessageCallback(text) {
-    Debug("Message: " + text);
-}
-
-Plymouth.SetDisplayPasswordFunction(DisplayPasswordCallback);
-Plymouth.SetMessageFunction(DisplayMessageCallback);
 
 fun DisplayMessageCallback(text) {
     Debug("Message: " + text);

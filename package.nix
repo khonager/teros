@@ -4,7 +4,7 @@ pkgs.stdenv.mkDerivation {
   pname = "teros-themes";
   version = "0.1.0";
 
-  dontBuild = true;
+  buildPhase = "true";
 
   src = ./.;
 
