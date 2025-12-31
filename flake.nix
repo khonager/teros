@@ -109,8 +109,15 @@
           # Trigger a password prompt purely to see it
           (${pkgs.plymouth}/bin/plymouth ask-for-password --prompt="Test" &)
           
-          echo "Running for 7 seconds..."
-          sleep 7
+          echo "Running for 7 seconds (Monitoring PID $daemon_pid)..."
+          for i in {1..7}; do
+             if ! kill -0 $daemon_pid 2>/dev/null; then
+                 echo "CRITICAL: Plymouth Daemon CRASHED at second $i!"
+                 break
+             fi
+             echo "  ... tick $i"
+             sleep 1
+          done
           echo "Done."
         '';
 

@@ -31,11 +31,18 @@ Plymouth.SetRefreshFunction (refresh_callback);
 Plymouth.SetRefreshFunction (refresh_callback);
 
 // --- PASSWORD HANDLING (MINIMAL DEBUG) ---
-// Kept simple to ensure animation doesn't crash.
+// Kept simple to ensure animation doesn't crash during VM test.
 
 fun DisplayPasswordCallback(prompt, bullets) {
     Debug("Password Typed: " + bullets);
 }
+
+fun DisplayMessageCallback(text) {
+    Debug("Message: " + text);
+}
+
+Plymouth.SetDisplayPasswordFunction(DisplayPasswordCallback);
+Plymouth.SetMessageFunction(DisplayMessageCallback);
 
 fun DisplayMessageCallback(text) {
     Debug("Message: " + text);
