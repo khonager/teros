@@ -3,9 +3,9 @@
 PHONY: all test-sora test-shiro clean
 
 # Build everything
+# Build everything - NO-OP for Nix builds
 all:
-	nix build .#test-sora
-	nix build .#test-shiro
+	@echo "Direct build not required for themes. Use installPhase."
 
 # Build and run Sora test
 test-sora:
