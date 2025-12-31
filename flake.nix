@@ -52,12 +52,48 @@
         test-sora = pkgs.writeShellScriptBin "test-sora" ''
           if [ "$EUID" -ne 0 ]; then echo "Error: Must run as root"; exit 1; fi
           
+          # Clean cleanup trap
+          cleanup() {
+            echo "cleaning up..."
+            ${pkgs.plymouth}/bin/plymouth quit 2>/dev/null || true
+            ${pkgs.psmisc}/bin/killall plymouthd 2>/dev/null || true
+          }
+          trap cleanup EXIT
+
+          echo "Checking for script.so plugin..."
+          if [ -f "${pkgs.plymouth}/lib/plymouth/script.so" ]; then
+             echo "Plugin found at ${pkgs.plymouth}/lib/plymouth/script.so"
+          else
+             echo "ERROR: script.so NOT FOUND in ${pkgs.plymouth}/lib/plymouth/"
+             echo "Plugins found:"
+             ls -R ${pkgs.plymouth}/lib/plymouth/
+          fi
+
           # 1. Install (Local Runtime)
           echo "Installing SORA to /run/plymouth/themes..."
+          # FIX: /run/plymouth/themes is often a symlink to the Nix Store.
+          # We must remove the SYMLINK (or dir) entirely to replace it with our writable dir.
+          if [ -e /run/plymouth/themes ] || [ -L /run/plymouth/themes ]; then
+            rm -rf /run/plymouth/themes
+          fi
+          
           mkdir -p /run/plymouth/themes
           cp -rf themes/sora /run/plymouth/themes/
           cp -rf themes/shiro /run/plymouth/themes/
+
+          # PATCH PATHS (Fixes Black Screen?)
+          echo "Patching paths in sora.plymouth..."
+          sed -i 's|ImageDir=.|ImageDir=/run/plymouth/themes/sora|g' /run/plymouth/themes/sora/sora.plymouth
+          sed -i 's|ScriptFile=./|ScriptFile=/run/plymouth/themes/sora/|g' /run/plymouth/themes/sora/sora.plymouth
           
+          echo "--- DIAGNOSTICS ---"
+          ls -R /run/plymouth/themes/sora
+          echo "Content of sora.plymouth:"
+          cat /run/plymouth/themes/sora/sora.plymouth
+          echo "Content of sora.script:"
+          cat /run/plymouth/themes/sora/sora.script
+          echo "-------------------"
+
           # 2. Run Test
           echo "Starting Plymouth (Sora)..."
           ${pkgs.plymouth}/bin/plymouthd --debug --tty=`tty` --no-daemon --theme=sora &
@@ -73,22 +109,44 @@
           # Trigger a password prompt purely to see it
           (${pkgs.plymouth}/bin/plymouth ask-for-password --prompt="Test" &)
           
-          echo "Running for 10 seconds..."
-          sleep 10
-          
-          echo "Stopping..."
-          ${pkgs.plymouth}/bin/plymouth quit
-          kill $daemon_pid 2>/dev/null || true
+          echo "Running for 7 seconds..."
+          sleep 7
+          echo "Done."
         '';
 
         test-shiro = pkgs.writeShellScriptBin "test-shiro" ''
           if [ "$EUID" -ne 0 ]; then echo "Error: Must run as root"; exit 1; fi
           
+          cleanup() {
+             echo "cleaning up..."
+             ${pkgs.plymouth}/bin/plymouth quit 2>/dev/null || true
+             ${pkgs.psmisc}/bin/killall plymouthd 2>/dev/null || true
+          }
+          trap cleanup EXIT
+
           echo "Installing SHIRO to /run/plymouth/themes..."
+          # FIX: Nuke the store symlink
+          if [ -e /run/plymouth/themes ] || [ -L /run/plymouth/themes ]; then
+            rm -rf /run/plymouth/themes
+          fi
+          
           mkdir -p /run/plymouth/themes
           cp -rf themes/sora /run/plymouth/themes/
           cp -rf themes/shiro /run/plymouth/themes/
           
+          # PATCH PATHS
+          echo "Patching paths in shiro.plymouth..."
+          sed -i 's|ImageDir=.|ImageDir=/run/plymouth/themes/shiro|g' /run/plymouth/themes/shiro/shiro.plymouth
+          sed -i 's|ScriptFile=./|ScriptFile=/run/plymouth/themes/shiro/|g' /run/plymouth/themes/shiro/shiro.plymouth
+          
+          echo "--- DIAGNOSTICS ---"
+          ls -R /run/plymouth/themes/shiro
+          echo "Content of shiro.plymouth:"
+          cat /run/plymouth/themes/shiro/shiro.plymouth
+          echo "Content of shiro.script:"
+          cat /run/plymouth/themes/shiro/shiro.script
+          echo "-------------------"
+
           echo "Starting Plymouth (Shiro)..."
           ${pkgs.plymouth}/bin/plymouthd --debug --tty=`tty` --no-daemon --theme=shiro &
           daemon_pid=$!
@@ -97,9 +155,8 @@
           ${pkgs.plymouth}/bin/plymouth --show-splash
           (${pkgs.plymouth}/bin/plymouth ask-for-password --prompt="Test" &)
           
-          sleep 10
-          ${pkgs.plymouth}/bin/plymouth quit
-          kill $daemon_pid 2>/dev/null || true
+          sleep 7
+          echo "Done."
         '';
       in
       {

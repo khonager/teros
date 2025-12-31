@@ -28,85 +28,22 @@ fun refresh_callback ()
 
 Plymouth.SetRefreshFunction (refresh_callback);
 
+Plymouth.SetRefreshFunction (refresh_callback);
 
-// --- PASSWORD & MESSAGE HANDLING ---
-
-// 0 = Chess, 1 = Binary
-bullet_mode = Math.Int(Math.Random() * 2);
-
-bullets_cache = [];
-
-fun GetRandomColor() {
-    // 0 = Pale Blue, 1 = White
-    if (Math.Int(Math.Random() * 2) == 0)
-        return {r: 0.4, g: 0.6, b: 1.0};
-    else
-        return {r: 1.0, g: 1.0, b: 1.0};
-}
-
-fun GetRandomSymbol() {
-    if (bullet_mode == 0) {
-        rand = Math.Int(Math.Random() * 6);
-        if (rand == 0) return "♔";
-        if (rand == 1) return "♕";
-        if (rand == 2) return "♖";
-        if (rand == 3) return "♗";
-        if (rand == 4) return "♘";
-        return "♙";
-    } else {
-        return Math.Int(Math.Random() * 2) + "";
-    }
-}
-
-password_area_y = screen.half.h + 100;
+// --- PASSWORD HANDLING (MINIMAL DEBUG) ---
+// Kept simple to ensure animation doesn't crash.
 
 fun DisplayPasswordCallback(prompt, bullets) {
-    total_bullets = bullets;
-    
-    // Cleanup excess
-    i = 0;
-    while (bullets_cache[i]) i++;
-    count = i;
-    
-    // If we have more in cache than needed
-    while (count > total_bullets) {
-        count--;
-        bullets_cache[count].sprite.SetImage(NULL);
-        bullets_cache[count] = NULL;
-    }
-    
-    start_x = screen.half.w - (total_bullets * 15);
-
-    for (i = 0; i < total_bullets; i++) {
-        if (!bullets_cache[i]) {
-            symbol = GetRandomSymbol();
-            color = GetRandomColor();
-            img = Image.Text(symbol, color.r, color.g, color.b);
-            spr = Sprite(img);
-            bullets_cache[i] = {image: img, sprite: spr};
-        }
-        
-        bullets_cache[i].sprite.SetX(start_x + (i * 30));
-        bullets_cache[i].sprite.SetY(password_area_y);
-        bullets_cache[i].sprite.SetZ(100);
-    }
+    Debug("Password Typed: " + bullets);
 }
 
-message_sprite = Sprite();
-message_sprite.SetPosition(screen.half.w, password_area_y + 50, 100);
-
 fun DisplayMessageCallback(text) {
-    // "Calculation Error."
-    my_image = Image.Text(text, 0.4, 0.6, 1.0); // Blue error text
-    message_sprite.SetImage(my_image);
-    message_sprite.SetX(screen.half.w - my_image.GetWidth() / 2);
-    message_sprite.SetY(password_area_y + 50);
+    Debug("Message: " + text);
 }
 
 Plymouth.SetDisplayPasswordFunction(DisplayPasswordCallback);
 Plymouth.SetMessageFunction(DisplayMessageCallback);
 
-// Standard Plymouth modes
 fun DisplayNormalCallback() { state.status = "play"; }
 fun QuitCallback() { state.status = "quit"; }
 Plymouth.SetDisplayNormalFunction(DisplayNormalCallback);
