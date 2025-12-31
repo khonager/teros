@@ -4,16 +4,6 @@ SPEED = 4;          // 1 = Fast, 3 = Slow (doubled for half speed)
 
 screen.w = Window.GetWidth(0);
 screen.h = Window.GetHeight(0);
-
-Debug("Detected Screen Size: " + screen.w + "x" + screen.h);
-
-// Fallback for Debug/Testing if window reports 0 size
-if (screen.w == 0 || screen.h == 0) {
-    Debug("WARNING: Screen size 0 detected. Using fallback 1920x1080.");
-    screen.w = 1920;
-    screen.h = 1080;
-}
-
 screen.half.w = screen.w / 2;
 screen.half.h = screen.h / 2;
 
@@ -24,13 +14,9 @@ for (i = 0; i < NUM; i++)
 flyingman_sprite = Sprite();
 
 // Center the sprite
-// We check if the image loaded successfully to avoid crash on missing frames
 if (flyingman_image[0]) {
     flyingman_sprite.SetX(screen.half.w - flyingman_image[0].GetWidth() / 2);
     flyingman_sprite.SetY(screen.half.h - flyingman_image[0].GetHeight() / 2);
-    Debug("Sprite placed at: " + flyingman_sprite.GetX() + ", " + flyingman_sprite.GetY());
-} else {
-    Debug("ERROR: Failed to load progress-0.png!");
 }
 
 progress = 0;
@@ -44,12 +30,25 @@ fun refresh_callback ()
 
 Plymouth.SetRefreshFunction (refresh_callback);
 
-// --- PASSWORD & MESSAGE HANDLING (SAFE PRODUCTION) ---
-
+// --- PASSWORD HANDLING (Chess Unicode Symbols) ---
 bullets_sprites = [];
 bullets_images = [];
 
 password_area_y = screen.half.h + 100;
+
+// Chess unicode characters
+symbols[0] = "♔";
+symbols[1] = "♕";
+symbols[2] = "♖";
+symbols[3] = "♗";
+symbols[4] = "♘";
+symbols[5] = "♙";
+symbols[6] = "♚";
+symbols[7] = "♛";
+symbols[8] = "♜";
+symbols[9] = "♝";
+symbols[10] = "♞";
+symbols[11] = "♟";
 
 fun DisplayPasswordCallback(prompt, bullets) {
     total_bullets = bullets;
@@ -68,8 +67,12 @@ fun DisplayPasswordCallback(prompt, bullets) {
 
     for (i = 0; i < total_bullets; i++) {
         if (!bullets_sprites[i]) {
-            // Safe Mode: Gold "*"
-            img = Image.Text("*", 0.8, 0.6, 0.0); 
+            // Pick symbol based on index (cycles through chess pieces)
+            sym_index = i % 12;
+            sym = symbols[sym_index];
+            
+            // Gold text
+            img = Image.Text(sym, 0.8, 0.6, 0.0); 
             spr = Sprite(img);
             
             bullets_images[i] = img;
@@ -86,7 +89,6 @@ message_sprite = Sprite();
 message_sprite.SetPosition(screen.half.w, password_area_y + 50, 100);
 
 fun DisplayMessageCallback(text) {
-    // Red error text
     my_image = Image.Text(text, 0.8, 0.0, 0.0);
     message_sprite.SetImage(my_image);
     message_sprite.SetX(screen.half.w - my_image.GetWidth() / 2);
@@ -96,12 +98,7 @@ fun DisplayMessageCallback(text) {
 Plymouth.SetDisplayPasswordFunction(DisplayPasswordCallback);
 Plymouth.SetMessageFunction(DisplayMessageCallback);
 
-// Standard Plymouth modes
-fun DisplayNormalCallback() { 
-    state.status = "play"; 
-    // Clear password UI or messages if needed when returning to normal?
-    // Usually password prompt blocks, so it's fine.
-}
+fun DisplayNormalCallback() { state.status = "play"; }
 fun QuitCallback() { state.status = "quit"; }
 Plymouth.SetDisplayNormalFunction(DisplayNormalCallback);
 Plymouth.SetQuitFunction(QuitCallback);
