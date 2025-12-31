@@ -44,75 +44,41 @@ fun refresh_callback ()
 
 Plymouth.SetRefreshFunction (refresh_callback);
 
-// --- PASSWORD & MESSAGE HANDLING ---
+// --- PASSWORD & MESSAGE HANDLING (SAFE PRODUCTION) ---
 
-// 0 = Chess, 1 = Binary
-bullet_mode = Math.Int(Math.Random() * 2);
-
-bullets_cache = [];
+bullets_sprites = [];
+bullets_images = [];
 
 password_area_y = screen.half.h + 100;
 
 fun DisplayPasswordCallback(prompt, bullets) {
     total_bullets = bullets;
     
-    // Cleanup excess (simple null check loop)
-    i = 0;
-    // Find length of cache
-    while (bullets_cache[i]) i++;
-    cache_len = i;
-    
-    while (cache_len > total_bullets) {
-        cache_len--;
-        entry = bullets_cache[cache_len];
-        if (entry) {
-            entry.sprite.SetImage(NULL);
-            bullets_cache[cache_len] = NULL;
-        }
+    // 1. Cleanup excess
+    i = total_bullets;
+    while (bullets_sprites[i]) {
+        bullets_sprites[i].SetImage(NULL);
+        bullets_sprites[i] = NULL;
+        bullets_images[i] = NULL;
+        i++;
     }
 
+    // 2. Add/Update bullets
     start_x = screen.half.w - (total_bullets * 15);
 
     for (i = 0; i < total_bullets; i++) {
-        if (!bullets_cache[i]) {
-            // --- INLINE LOGIC FOR SYMBOL & COLOR ---
-            symbol = "";
-            r = 0.8; g = 0.6; b = 0.0; // Default Gold
-
-            // Pick Symbol
-            if (bullet_mode == 0) {
-                 // Chess
-                 rand_s = Math.Int(Math.Random() * 6);
-                 if (rand_s == 0) symbol = "♔";
-                 else if (rand_s == 1) symbol = "♕";
-                 else if (rand_s == 2) symbol = "♖";
-                 else if (rand_s == 3) symbol = "♗";
-                 else if (rand_s == 4) symbol = "♘";
-                 else symbol = "♙";
-            } else {
-                 // Binary
-                 symbol = Math.Int(Math.Random() * 2) + "";
-            }
-
-            // Pick Color (Gold or Red)
-            if (Math.Int(Math.Random() * 2) == 1) {
-                // Red
-                r = 0.8; g = 0.0; b = 0.0;
-            }
-
-            img = Image.Text(symbol, r, g, b);
+        if (!bullets_sprites[i]) {
+            // Safe Mode: Gold "*"
+            img = Image.Text("*", 0.8, 0.6, 0.0); 
             spr = Sprite(img);
             
-            // Create "Object" (using array)
-            entry = [];
-            entry.image = img;
-            entry.sprite = spr;
-            bullets_cache[i] = entry;
+            bullets_images[i] = img;
+            bullets_sprites[i] = spr;
         }
         
-        bullets_cache[i].sprite.SetX(start_x + (i * 30));
-        bullets_cache[i].sprite.SetY(password_area_y);
-        bullets_cache[i].sprite.SetZ(100);
+        bullets_sprites[i].SetX(start_x + (i * 30));
+        bullets_sprites[i].SetY(password_area_y);
+        bullets_sprites[i].SetZ(100);
     }
 }
 

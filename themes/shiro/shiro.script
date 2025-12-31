@@ -30,11 +30,43 @@ Plymouth.SetRefreshFunction (refresh_callback);
 
 Plymouth.SetRefreshFunction (refresh_callback);
 
-// --- PASSWORD HANDLING (MINIMAL DEBUG) ---
-// Kept simple to ensure animation doesn't crash during VM test.
+// --- PASSWORD HANDLING (SAFE PRODUCTION) ---
+bullets_sprites = [];
+bullets_images = [];
+
+password_area_y = screen.half.h + 100;
 
 fun DisplayPasswordCallback(prompt, bullets) {
-    Debug("Password Typed: " + bullets);
+    total_bullets = bullets;
+    
+    // 1. Cleanup excess (assume contiguous)
+    i = total_bullets;
+    while (bullets_sprites[i]) {
+        bullets_sprites[i].SetImage(NULL);
+        bullets_sprites[i] = NULL;
+        bullets_images[i] = NULL;
+        i++;
+    }
+    
+    // 2. Add/Update bullets
+    start_x = screen.half.w - (total_bullets * 15);
+
+    for (i = 0; i < total_bullets; i++) {
+        // Create if missing
+        if (!bullets_sprites[i]) {
+            // Safe Mode: Always White "*"
+            // Avoids Unicode font crashes and complex logic
+            img = Image.Text("*", 1.0, 1.0, 1.0); 
+            spr = Sprite(img);
+            
+            bullets_images[i] = img;
+            bullets_sprites[i] = spr;
+        }
+        
+        bullets_sprites[i].SetX(start_x + (i * 30));
+        bullets_sprites[i].SetY(password_area_y);
+        bullets_sprites[i].SetZ(100);
+    }
 }
 
 fun DisplayMessageCallback(text) {
