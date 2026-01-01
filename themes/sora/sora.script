@@ -86,14 +86,12 @@ fun DisplayPasswordCallback(prompt, bullets) {
         last_actual++;
     }
     
-    // Handle backspace (characters deleted)
+    // Handle backspace - always remove exactly 1 visual bullet
     while (last_actual > actual) {
         last_actual--;
-        mult = char_multipliers[last_actual];
-        char_multipliers[last_actual] = 0;
         
-        // Remove 'mult' visual bullets
-        for (k = 0; k < mult; k++) {
+        // Remove 1 visual bullet (if any exist)
+        if (visual_count > 0) {
             visual_count--;
             if (bullets_sprites[visual_count]) {
                 bullets_sprites[visual_count].SetImage(NULL);
