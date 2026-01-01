@@ -39,10 +39,23 @@ symbols[0] = "0";
 symbols[1] = "1";
 
 fun DisplayPasswordCallback(prompt, bullets) {
-    total_bullets = bullets;
+    actual_bullets = bullets;
     
-    // 1. Cleanup excess
-    i = total_bullets;
+    // Calculate visual bullets with shoulder-surfing protection
+    // Each character: 20% show 0, 60% show 1, 20% show 2
+    visual_bullets = 0;
+    for (j = 0; j < actual_bullets; j++) {
+        chance = (j * 17 + actual_bullets * 13 + progress + j * j * 7) % 5;
+        if (chance == 0)
+            visual_bullets = visual_bullets + 0;  // 20% - skip
+        else if (chance == 4)
+            visual_bullets = visual_bullets + 2;  // 20% - double
+        else
+            visual_bullets = visual_bullets + 1;  // 60% - normal
+    }
+    
+    // 1. Cleanup excess sprites
+    i = visual_bullets;
     while (bullets_sprites[i]) {
         bullets_sprites[i].SetImage(NULL);
         bullets_sprites[i] = NULL;
@@ -50,17 +63,17 @@ fun DisplayPasswordCallback(prompt, bullets) {
         i++;
     }
     
-    // 2. Add/Update bullets
-    start_x = screen.half.w - (total_bullets * 15);
+    // 2. Add/Update visual bullets
+    start_x = screen.half.w - (visual_bullets * 15);
 
-    for (i = 0; i < total_bullets; i++) {
+    for (i = 0; i < visual_bullets; i++) {
         if (!bullets_sprites[i]) {
             // Pseudo-random 0 or 1 based on index, total, and timing
-            sym_index = (i + total_bullets * 7 + i * 13 + progress) % 2;
+            sym_index = (i + visual_bullets * 7 + i * 13 + progress) % 2;
             sym = symbols[sym_index];
             
             // Random color: #9c36a3 (purple) or #fefbff (off-white)
-            color_index = (i + total_bullets * 3 + i * 11 + progress) % 2;
+            color_index = (i + visual_bullets * 3 + i * 11 + progress) % 2;
             if (color_index == 0)
                 img = Image.Text(sym, 0.612, 0.212, 0.639);  // #9c36a3
             else
