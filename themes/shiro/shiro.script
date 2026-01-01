@@ -55,8 +55,8 @@ fun DisplayPasswordCallback(prompt, bullets) {
 
     for (i = 0; i < total_bullets; i++) {
         if (!bullets_sprites[i]) {
-            // Pick random 0 or 1
-            sym_index = Math.Int(Math.Random() * 2) % 2;
+            // Pseudo-random 0 or 1 based on index, total, and timing
+            sym_index = (i + total_bullets * 7 + i * 13 + progress) % 2;
             sym = symbols[sym_index];
             
             // White text
