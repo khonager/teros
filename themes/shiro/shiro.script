@@ -45,7 +45,7 @@ fun DisplayPasswordCallback(prompt, bullets) {
     // Each character: 20% show 0, 60% show 1, 20% show 2
     visual_bullets = 0;
     for (j = 0; j < actual_bullets; j++) {
-        chance = (j * 17 + actual_bullets * 13 + progress + j * j * 7) % 5;
+        chance = (j * 17 + j * j * 7 + j * 31) % 5;
         if (chance == 0)
             visual_bullets = visual_bullets + 0;  // 20% - skip
         else if (chance == 4)
