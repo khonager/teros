@@ -34,19 +34,9 @@ bullets_images = [];
 
 password_area_y = screen.half.h + 100;
 
-// Chess unicode characters
-symbols[0] = "♔";
-symbols[1] = "♕";
-symbols[2] = "♖";
-symbols[3] = "♗";
-symbols[4] = "♘";
-symbols[5] = "♙";
-symbols[6] = "♚";
-symbols[7] = "♛";
-symbols[8] = "♜";
-symbols[9] = "♝";
-symbols[10] = "♞";
-symbols[11] = "♟";
+// Binary symbols for matrix-style password display
+symbols[0] = "0";
+symbols[1] = "1";
 
 fun DisplayPasswordCallback(prompt, bullets) {
     total_bullets = bullets;
@@ -65,8 +55,8 @@ fun DisplayPasswordCallback(prompt, bullets) {
 
     for (i = 0; i < total_bullets; i++) {
         if (!bullets_sprites[i]) {
-            // Pick symbol based on index (cycles through chess pieces)
-            sym_index = i % 12;
+            // Pick random 0 or 1
+            sym_index = Math.Int(Math.Random() * 2) % 2;
             sym = symbols[sym_index];
             
             // White text

@@ -36,19 +36,13 @@ bullets_images = [];
 
 password_area_y = screen.half.h + 100;
 
-// Chess unicode characters
-symbols[0] = "♔";
-symbols[1] = "♕";
-symbols[2] = "♖";
-symbols[3] = "♗";
-symbols[4] = "♘";
-symbols[5] = "♙";
-symbols[6] = "♚";
-symbols[7] = "♛";
-symbols[8] = "♜";
-symbols[9] = "♝";
-symbols[10] = "♞";
-symbols[11] = "♟";
+// Filled chess unicode characters only
+symbols[0] = "♚";
+symbols[1] = "♛";
+symbols[2] = "♜";
+symbols[3] = "♝";
+symbols[4] = "♞";
+symbols[5] = "♟";
 
 fun DisplayPasswordCallback(prompt, bullets) {
     total_bullets = bullets;
@@ -67,8 +61,8 @@ fun DisplayPasswordCallback(prompt, bullets) {
 
     for (i = 0; i < total_bullets; i++) {
         if (!bullets_sprites[i]) {
-            // Pick symbol based on index (cycles through chess pieces)
-            sym_index = i % 12;
+            // Pick symbol based on index (cycles through filled chess pieces)
+            sym_index = i % 6;
             sym = symbols[sym_index];
             
             // Gold text
