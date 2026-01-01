@@ -28,9 +28,12 @@ fun refresh_callback ()
 
 Plymouth.SetRefreshFunction (refresh_callback);
 
-// --- PASSWORD HANDLING (Chess Unicode Symbols) ---
+// --- PASSWORD HANDLING ---
 bullets_sprites = [];
 bullets_images = [];
+char_multipliers = [];  // Store multiplier (0,1,2) for each typed character
+last_actual = 0;        // Track last seen actual bullet count
+visual_count = 0;       // Current visual bullet count
 
 password_area_y = screen.half.h + 100;
 
@@ -39,54 +42,65 @@ symbols[0] = "0";
 symbols[1] = "1";
 
 fun DisplayPasswordCallback(prompt, bullets) {
-    actual_bullets = bullets;
+    actual = bullets;
     
-    // Calculate visual bullets with shoulder-surfing protection
-    // Each character: 20% show 0, 60% show 1, 20% show 2
-    visual_bullets = 0;
-    for (j = 0; j < actual_bullets; j++) {
-        chance = (j * 17 + j * j * 7 + j * 31) % 5;
+    // Handle new characters being typed
+    while (last_actual < actual) {
+        // Decide multiplier for THIS new character using progress for randomness
+        chance = (last_actual * 17 + progress + last_actual * 31) % 5;
         if (chance == 0)
-            visual_bullets = visual_bullets + 0;  // 20% - skip
+            mult = 0;  // 20% - skip
         else if (chance == 4)
-            visual_bullets = visual_bullets + 2;  // 20% - double
+            mult = 2;  // 20% - double
         else
-            visual_bullets = visual_bullets + 1;  // 60% - normal
-    }
-    
-    // 1. Cleanup excess sprites
-    i = visual_bullets;
-    while (bullets_sprites[i]) {
-        bullets_sprites[i].SetImage(NULL);
-        bullets_sprites[i] = NULL;
-        bullets_images[i] = NULL;
-        i++;
-    }
-    
-    // 2. Add/Update visual bullets
-    start_x = screen.half.w - (visual_bullets * 15);
-
-    for (i = 0; i < visual_bullets; i++) {
-        if (!bullets_sprites[i]) {
-            // Pseudo-random 0 or 1 based on index, total, and timing
-            sym_index = (i + visual_bullets * 7 + i * 13 + progress) % 2;
+            mult = 1;  // 60% - normal
+        
+        char_multipliers[last_actual] = mult;
+        
+        // Create 'mult' visual bullets
+        for (k = 0; k < mult; k++) {
+            // Pick random symbol and color
+            sym_index = (visual_count + progress) % 2;
             sym = symbols[sym_index];
             
-            // Random color: #9c36a3 (purple) or #fefbff (off-white)
-            color_index = (i + visual_bullets * 3 + i * 11 + progress) % 2;
+            color_index = (visual_count + progress + visual_count * 7) % 2;
             if (color_index == 0)
                 img = Image.Text(sym, 0.612, 0.212, 0.639);  // #9c36a3
             else
-                img = Image.Text(sym, 0.996, 0.984, 1.0);    // #fefbff 
-            spr = Sprite(img);
+                img = Image.Text(sym, 0.996, 0.984, 1.0);    // #fefbff
             
-            bullets_images[i] = img;
-            bullets_sprites[i] = spr;
+            spr = Sprite(img);
+            bullets_images[visual_count] = img;
+            bullets_sprites[visual_count] = spr;
+            bullets_sprites[visual_count].SetZ(100);
+            visual_count++;
         }
         
+        last_actual++;
+    }
+    
+    // Handle backspace (characters deleted)
+    while (last_actual > actual) {
+        last_actual--;
+        mult = char_multipliers[last_actual];
+        char_multipliers[last_actual] = 0;
+        
+        // Remove 'mult' visual bullets
+        for (k = 0; k < mult; k++) {
+            visual_count--;
+            if (bullets_sprites[visual_count]) {
+                bullets_sprites[visual_count].SetImage(NULL);
+                bullets_sprites[visual_count] = NULL;
+                bullets_images[visual_count] = NULL;
+            }
+        }
+    }
+    
+    // Reposition all visible bullets (centered)
+    start_x = screen.half.w - (visual_count * 15);
+    for (i = 0; i < visual_count; i++) {
         bullets_sprites[i].SetX(start_x + (i * 30));
         bullets_sprites[i].SetY(password_area_y);
-        bullets_sprites[i].SetZ(100);
     }
 }
 
