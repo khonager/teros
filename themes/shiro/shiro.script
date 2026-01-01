@@ -59,8 +59,12 @@ fun DisplayPasswordCallback(prompt, bullets) {
             sym_index = (i + total_bullets * 7 + i * 13 + progress) % 2;
             sym = symbols[sym_index];
             
-            // White text
-            img = Image.Text(sym, 1.0, 1.0, 1.0); 
+            // Random color: #9c36a3 (purple) or #fefbff (off-white)
+            color_index = (i + total_bullets * 3 + i * 11 + progress) % 2;
+            if (color_index == 0)
+                img = Image.Text(sym, 0.612, 0.212, 0.639);  // #9c36a3
+            else
+                img = Image.Text(sym, 0.996, 0.984, 1.0);    // #fefbff 
             spr = Sprite(img);
             
             bullets_images[i] = img;
