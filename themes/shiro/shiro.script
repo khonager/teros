@@ -31,7 +31,6 @@ Plymouth.SetRefreshFunction (refresh_callback);
 // --- PASSWORD HANDLING ---
 bullets_sprites = [];
 bullets_images = [];
-char_multipliers = [];  // Store multiplier (0,1,2) for each typed character
 last_actual = 0;        // Track last seen actual bullet count
 visual_count = 0;       // Current visual bullet count
 
@@ -46,35 +45,22 @@ fun DisplayPasswordCallback(prompt, bullets) {
     
     // Handle new characters being typed
     while (last_actual < actual) {
-        // Decide multiplier for THIS new character using progress for randomness
-        chance = (last_actual * 17 + progress + last_actual * 31) % 5;
-        if (chance == 0)
-            mult = 0;  // 20% - skip
-        else if (chance == 4)
-            mult = 2;  // 20% - double
+        // Create 1 visual bullet
+        // Pick random symbol and color
+        sym_index = (visual_count + progress) % 2;
+        sym = symbols[sym_index];
+        
+        color_index = (visual_count + progress + visual_count * 7) % 2;
+        if (color_index == 0)
+            img = Image.Text(sym, 0.612, 0.212, 0.639);  // #9c36a3
         else
-            mult = 1;  // 60% - normal
+            img = Image.Text(sym, 0.996, 0.984, 1.0);    // #fefbff
         
-        char_multipliers[last_actual] = mult;
-        
-        // Create 'mult' visual bullets
-        for (k = 0; k < mult; k++) {
-            // Pick random symbol and color
-            sym_index = (visual_count + progress) % 2;
-            sym = symbols[sym_index];
-            
-            color_index = (visual_count + progress + visual_count * 7) % 2;
-            if (color_index == 0)
-                img = Image.Text(sym, 0.612, 0.212, 0.639);  // #9c36a3
-            else
-                img = Image.Text(sym, 0.996, 0.984, 1.0);    // #fefbff
-            
-            spr = Sprite(img);
-            bullets_images[visual_count] = img;
-            bullets_sprites[visual_count] = spr;
-            bullets_sprites[visual_count].SetZ(100);
-            visual_count++;
-        }
+        spr = Sprite(img);
+        bullets_images[visual_count] = img;
+        bullets_sprites[visual_count] = spr;
+        bullets_sprites[visual_count].SetZ(100);
+        visual_count++;
         
         last_actual++;
     }
